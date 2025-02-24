@@ -15,7 +15,8 @@ public class Player : MonoBehaviour
     bool isRunning = false;
     bool isFacingRight = true;
     bool isGrounded = false;
-    [SerializeField] bool isFacingWall = false;
+    bool isFacingWall = false;
+    bool isSliding = false;
 
     Rigidbody2D rb2d;
     Animator animator;
@@ -49,6 +50,7 @@ public class Player : MonoBehaviour
     {
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, groundLayer);
         isFacingWall = Physics2D.Raycast(transform.position, Vector2.right * (isFacingRight ? 1 : -1), wallCheckDistance, groundLayer);
+        isSliding = isFacingWall && rb2d.velocity.y < 0;
 
         Vector2 vec = rb2d.velocity;
 
@@ -62,12 +64,18 @@ public class Player : MonoBehaviour
             vec.y = jumpForce;
         }
 
+        if (isSliding)
+        {
+            vec.y = vec.y * 0.5f;
+        }
+
         rb2d.velocity = vec;
     }
 
     void UpdateAnimation()
     {
         animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isSliding", isSliding);
         animator.SetFloat("xVelocity", rb2d.velocity.x);
         animator.SetFloat("yVelocity", rb2d.velocity.y);
 
